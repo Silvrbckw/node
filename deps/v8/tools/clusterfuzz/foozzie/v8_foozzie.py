@@ -260,7 +260,7 @@ class ExecutionArgumentsConfig(object):
 
   def make_options(self, options, default_config=None, default_d8=None):
     def get(name):
-      return getattr(options, '%s_%s' % (self.label, name))
+      return getattr(options, f'{self.label}_{name}')
 
     config = default_config or get('config')
     assert config in CONFIGS
@@ -288,7 +288,7 @@ class ExecutionConfig(object):
 
     # Options for a fallback configuration only exist when comparing
     # different architectures.
-    fallback_label = label + '_fallback'
+    fallback_label = f'{label}_fallback'
     self.fallback = None
     if getattr(options, fallback_label, None):
       self.fallback = ExecutionConfig(options, fallback_label)
@@ -354,24 +354,21 @@ def get_meta_data(content):
   """Extracts original-source-file paths from test case content."""
   sources = []
   for line in content.splitlines():
-    match = SOURCE_RE.match(line)
-    if match:
+    if match := SOURCE_RE.match(line):
       sources.append(match.group(1))
   return {'sources': sources}
 
 
 def content_bailout(content, ignore_fun):
   """Print failure state and return if ignore_fun matches content."""
-  bug = (ignore_fun(content) or '').strip()
-  if bug:
+  if bug := (ignore_fun(content) or '').strip():
     raise FailException(FAILURE_HEADER_TEMPLATE % dict(
         configs='', source_key='', suppression=bug))
 
 
 def fail_bailout(output, ignore_by_output_fun):
   """Print failure state and return if ignore_by_output_fun matches output."""
-  bug = (ignore_by_output_fun(output.stdout) or '').strip()
-  if bug:
+  if bug := (ignore_by_output_fun(output.stdout) or '').strip():
     raise FailException(FAILURE_HEADER_TEMPLATE % dict(
         configs='', source_key='', suppression=bug))
 
@@ -383,8 +380,8 @@ def format_difference(
   # The first three entries will be parsed by clusterfuzz. Format changes
   # will require changes on the clusterfuzz side.
   source_key = source_key or cluster_failures(source)
-  first_config_label = '%s,%s' % (first_config.arch, first_config.config)
-  second_config_label = '%s,%s' % (second_config.arch, second_config.config)
+  first_config_label = f'{first_config.arch},{first_config.config}'
+  second_config_label = f'{second_config.arch},{second_config.config}'
   source_file_text = SOURCE_FILE_TEMPLATE % source if source else ''
 
   if PYTHON3:
@@ -395,11 +392,11 @@ def format_difference(
     second_stdout = second_config_output.stdout.decode('utf-8', 'replace')
     difference = difference.decode('utf-8', 'replace')
 
-  text = (FAILURE_TEMPLATE % dict(
-      configs='%s:%s' % (first_config_label, second_config_label),
+  text = FAILURE_TEMPLATE % dict(
+      configs=f'{first_config_label}:{second_config_label}',
       source_file_text=source_file_text,
       source_key=source_key,
-      suppression='', # We can't tie bugs to differences.
+      suppression='',
       first_config_label=first_config_label,
       second_config_label=second_config_label,
       first_config_flags=' '.join(first_config.flags),
@@ -408,11 +405,8 @@ def format_difference(
       second_config_output=second_stdout,
       source=source,
       difference=difference,
-  ))
-  if PYTHON3:
-    return text
-  else:
-    return text.encode('utf-8', 'replace')
+  )
+  return text if PYTHON3 else text.encode('utf-8', 'replace')
 
 
 def cluster_failures(source, known_failures=None):
@@ -602,7 +596,7 @@ if __name__ == "__main__":
   except Exception as e:
     print(FAILURE_HEADER_TEMPLATE % dict(
         configs='', source_key='', suppression='internal_error'))
-    print('# Internal error: %s' % e)
+    print(f'# Internal error: {e}')
     traceback.print_exc(file=sys.stdout)
     result = RETURN_FAIL
 

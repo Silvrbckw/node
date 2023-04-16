@@ -22,6 +22,7 @@ Using diff num_input_files and using a weight of 1 for every hints_file will
 give the strict intersection of all files.
 """
 
+
 import argparse
 import sys
 
@@ -60,13 +61,13 @@ must_agree = ARGS['combine_option'] == "agreed"
 weight_threshold = max(1, ARGS['weight_threshold'])
 
 hint_args = ARGS['hint_files_and_weights']
-hint_files_and_weights = zip(hint_args[0::2], hint_args[1::2])
+hint_files_and_weights = zip(hint_args[::2], hint_args[1::2])
 
 
 def add_branch_hints(hint_file, weight, branch_hints, builtin_hashes):
   try:
     with open(hint_file, "r") as f:
-      for line in f.readlines():
+      for line in f:
         fields = line.split(',')
         if fields[0] == BRANCH_HINT_MARKER:
           builtin_name = fields[1]
@@ -75,20 +76,14 @@ def add_branch_hints(hint_file, weight, branch_hints, builtin_hashes):
           key = (builtin_name, true_block_id, false_block_id)
           delta = weight if (int(fields[4]) > 0) else -weight
           if key not in branch_hints:
-            if must_agree:
-              # The boolean value records whether or not any conflicts have been
-              # found for this branch.
-              initial_hint = (False, 0)
-            else:
-              initial_hint = 0
+            initial_hint = (False, 0) if must_agree else 0
             branch_hints[key] = initial_hint
           if must_agree:
             (has_conflicts, count) = branch_hints[key]
             if not has_conflicts:
-              if abs(delta) + abs(count) == abs(delta + count):
-                branch_hints[key] = (False, count + delta)
-              else:
-                branch_hints[key] = (True, 0)
+              branch_hints[key] = ((False, count + delta) if abs(delta) +
+                                   abs(count) == abs(delta + count) else
+                                   (True, 0))
           else:
             branch_hints[key] += delta
         elif fields[0] == BUILTIN_HASH_MARKER:
@@ -96,13 +91,14 @@ def add_branch_hints(hint_file, weight, branch_hints, builtin_hashes):
           builtin_hash = int(fields[2])
           if builtin_name in builtin_hashes:
             if builtin_hashes[builtin_name] != builtin_hash:
-              print("Builtin hashes {} and {} for {} do not match.".format(
-                  builtin_hashes[builtin_name], builtin_hash, builtin_name))
+              print(
+                  f"Builtin hashes {builtin_hashes[builtin_name]} and {builtin_hash} for {builtin_name} do not match."
+              )
               sys.exit(1)
           else:
             builtin_hashes[builtin_name] = builtin_hash
   except IOError as e:
-    print("Cannot read from {}. {}.".format(hint_file, e.strerror))
+    print(f"Cannot read from {hint_file}. {e.strerror}.")
     sys.exit(1)
 
 
@@ -118,13 +114,13 @@ def write_hints_to_output(output_file, branch_hints, builtin_hashes):
           count = branch_hints[key]
         if abs(count) >= abs(weight_threshold):
           hint = 1 if count > 0 else 0
-          f.write("{},{},{},{},{}\n".format(BRANCH_HINT_MARKER, key[0], key[1],
-                                            key[2], hint))
+          f.write(f"{BRANCH_HINT_MARKER},{key[0]},{key[1]},{key[2]},{hint}\n")
       for builtin_name in builtin_hashes:
-        f.write("{},{},{}\n".format(BUILTIN_HASH_MARKER, builtin_name,
-                                    builtin_hashes[builtin_name]))
+        f.write(
+            f"{BUILTIN_HASH_MARKER},{builtin_name},{builtin_hashes[builtin_name]}\n"
+        )
   except IOError as e:
-    print("Cannot write to {}. {}.".format(output_file, e.strerror))
+    print(f"Cannot write to {output_file}. {e.strerror}.")
     sys.exit(1)
 
 

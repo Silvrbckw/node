@@ -106,7 +106,6 @@ if (is_posix) {
         actual_cmake = self._Compile(gn_string)
         self.assertIn(self._Canonicalize(expected_cmake),
                       self._Canonicalize(actual_cmake))
-        pass
 
     def _CompileExpressionAndCheck(self, expected_cmake, gn_string):
         gn_string = f'if ({gn_string}) {{ sources = [ "source.cc" ] }}'
@@ -114,7 +113,6 @@ if (is_posix) {
         actual_cmake = self._Compile(gn_string)
         self.assertIn(self._Canonicalize(expected_cmake),
                       self._Canonicalize(actual_cmake))
-        pass
 
     @staticmethod
     def _Canonicalize(str):

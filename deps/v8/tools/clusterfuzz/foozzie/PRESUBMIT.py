@@ -22,7 +22,7 @@ def _CommonChecks(input_api, output_api):
     _RunTests,
   ]
 
-  return sum([check(input_api, output_api) for check in checks], [])
+  return sum((check(input_api, output_api) for check in checks), [])
 
 def CheckChangeOnCommit(input_api, output_api):
   return _CommonChecks(input_api, output_api)

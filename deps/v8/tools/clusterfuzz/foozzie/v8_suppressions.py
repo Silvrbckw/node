@@ -111,7 +111,7 @@ def get_output_capped(output1, output2):
   else:
     cap = len(output2.stdout)
 
-  return output1.stdout[0:cap], output2.stdout[0:cap]
+  return output1.stdout[:cap], output2.stdout[:cap]
 
 
 def line_pairs(lines):
@@ -129,10 +129,7 @@ def caret_match(line1, line2):
 
 
 def short_line_output(line):
-  if len(line) <= MAX_LINE_LENGTH:
-    # Avoid copying.
-    return line
-  return line[0:MAX_LINE_LENGTH] + '...'
+  return line if len(line) <= MAX_LINE_LENGTH else f'{line[:MAX_LINE_LENGTH]}...'
 
 
 def ignore_by_regexp(line1, line2, allowed):
@@ -141,11 +138,8 @@ def ignore_by_regexp(line1, line2, allowed):
   for exp in allowed:
     match1 = exp.match(line1)
     match2 = exp.match(line2)
-    if match1 and match2:
-      # If there are groups in the regexp, ensure the groups matched the same
-      # things.
-      if match1.groups() == match2.groups():  # tuple comparison
-        return True
+    if match1 and match2 and match1.groups() == match2.groups():
+      return True
   return False
 
 
@@ -174,13 +168,13 @@ def diff_output(output1, output2, allowed, ignore1, ignore2):
       line_pairs(lines1), line_pairs(lines2), fillvalue=(None, None)):
 
     # Only one of the two iterators should run out.
-    assert not (line1 is None and line2 is None)
+    assert line1 is not None or line2 is not None
 
     # One iterator ends earlier.
     if line1 is None:
-      return '+ %s' % short_line_output(line2), source
+      return f'+ {short_line_output(line2)}', source
     if line2 is None:
-      return '- %s' % short_line_output(line1), source
+      return f'- {short_line_output(line1)}', source
 
     # If lines are equal, no further checks are necessary.
     if line1 == line2:
@@ -249,10 +243,10 @@ class V8Suppression(object):
       # Search the whole test case if preamble can't be found. E.g. older
       # already minimized test cases might have dropped the delimiter line.
       content = testcase
-    for bug, exp in IGNORE_TEST_CASES.items():
-      if exp.search(content):
-        return bug
-    return None
+    return next(
+        (bug for bug, exp in IGNORE_TEST_CASES.items() if exp.search(content)),
+        None,
+    )
 
   def ignore_by_metadata(self, metadata):
     for bug, sources in self.ignore_sources.items():
@@ -267,7 +261,6 @@ class V8Suppression(object):
         if exp.search(output):
           return bug
       return None
+
     bug = check(self.ignore_output)
-    if bug:
-      return bug
-    return None
+    return bug if bug else None

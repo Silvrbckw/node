@@ -121,9 +121,7 @@ class V8GNTransformer(object):
         return self.builder.BuildTarget(target_type, target, stmts)
 
     def _StatementList(self, stmts):
-        built_stmts = []
-        for stmt in stmts:
-            built_stmts.append(self._Statement(stmt))
+        built_stmts = [self._Statement(stmt) for stmt in stmts]
         return [stmt for stmt in built_stmts if stmt]
 
     def _Statement(self, stmt):
@@ -423,7 +421,7 @@ else{else_cond}
 # {target.desc} target.
 {target.cmake}({target.name} {' '.join(source_sets)})
 
-{'target_link_libraries(' + target.name + ' ' + ' '.join(target.deps) + ')' if target.deps else ''}
+{f'target_link_libraries({target.name} ' + ' '.join(target.deps) + ')' if target.deps else ''}
 
 target_include_directories({target.name} PRIVATE "${{CMAKE_SOURCE_DIR}}"
                                          PRIVATE "${{CMAKE_SOURCE_DIR}}/include")
@@ -449,7 +447,7 @@ endif()"""
 
     @staticmethod
     def _SourceVar(target):
-        return CMakeBuilder._CMakeVar(target) + '_SOURCES'
+        return f'{CMakeBuilder._CMakeVar(target)}_SOURCES'
 
     @staticmethod
     def _CMakeVar(var):

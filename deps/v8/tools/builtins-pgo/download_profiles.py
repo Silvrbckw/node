@@ -44,14 +44,15 @@ def parse_args(cmd_args):
           f'defined in {VERSION_FILE}.'),
       formatter_class=argparse.RawDescriptionHelpFormatter,
       epilog='\n'.join([
-          f'examples:', f'  {FILENAME} download',
+          'examples:',
+          f'  {FILENAME} download',
           f'  {FILENAME} validate --bucket=chromium-v8-builtins-pgo-staging',
-          f'', f'return codes:',
-          f'  0 - profiles successfully downloaded or validated',
-          f'  1 - unexpected error, see stdout',
+          f'',
+          'return codes:',
+          '  0 - profiles successfully downloaded or validated',
+          '  1 - unexpected error, see stdout',
           f'  2 - invalid arguments specified, see {FILENAME} --help',
-          f'  3 - invalid path to depot_tools provided'
-          f'  4 - gsutil was unable to retrieve data from the bucket'
+          '  3 - invalid path to depot_tools provided  4 - gsutil was unable to retrieve data from the bucket',
       ]),
   )
 

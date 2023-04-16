@@ -62,12 +62,9 @@ class TestCase(testcase.D8TestCase):
     files_list = []  # List of file names to append to command arguments.
     files_match = FILES_PATTERN.search(source);
     # Accept several lines of 'Files:'.
-    while True:
-      if files_match:
-        files_list += files_match.group(1).strip().split()
-        files_match = FILES_PATTERN.search(source, files_match.end())
-      else:
-        break
+    while files_match:
+      files_list += files_match.group(1).strip().split()
+      files_match = FILES_PATTERN.search(source, files_match.end())
     files = [ os.path.normpath(os.path.join(self.suite.root, '..', '..', f))
               for f in files_list ]
     testfilename = os.path.join(self.suite.root, self.path + self._get_suffix())
@@ -95,4 +92,5 @@ class TestCase(testcase.D8TestCase):
   def output_proc(self):
     return webkit.OutProc(
         self.expected_outcomes,
-        os.path.join(self.suite.root, self.path) + '-expected.txt')
+        f'{os.path.join(self.suite.root, self.path)}-expected.txt',
+    )
