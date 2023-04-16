@@ -14,6 +14,7 @@ stay up-to-date with:
 cat workdir/output/stats.json | python -m json.tool
 """
 
+
 # TODO(machenbach): This is currently tailored for differential fuzzing
 # with foozzie. It could be generalized, but that'd require duplicating
 # clusterfuzz' stack analysis to some degree. E.g. understanding asan
@@ -43,10 +44,7 @@ if os.path.exists(TEST_CASES):
 else:
   os.mkdir(TEST_CASES)
 
-# Use ~40000 for 24 hours of fuzzing on a modern work station.
-RUNS = 8
-if len(sys.argv) > 1:
-  RUNS = int(sys.argv[1])
+RUNS = int(sys.argv[1]) if len(sys.argv) > 1 else 8
 
 def run(n):
   """Multiprocessed function that executes a single fuzz session and
@@ -102,14 +100,12 @@ class Stats(object):
     }
 
 all_stats = Stats()
-count = 0
 pool = Pool(processes=PROCESSES)
 
 # Iterate over all runs multiprocessed and merge the statistics and
 # failure data of the single runs.
-for stats, failures in pool.imap_unordered(run, range(RUNS)):
+for count, (stats, failures) in enumerate(pool.imap_unordered(run, range(RUNS)), start=1):
   all_stats.add(stats, failures)
-  count += 1
   if count % max(1, int(RUNS / 20)) == 0:
     print('Progress: %d runs (%d%%)' % (count, count * 100 / RUNS))
 
