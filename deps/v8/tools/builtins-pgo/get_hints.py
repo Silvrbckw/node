@@ -75,7 +75,7 @@ def parse_log_file(log_file):
   builtin_hashes = {}
   try:
     with open(log_file, "r") as f:
-      for line in f.readlines():
+      for line in f:
         fields = line.split('\t')
         if fields[0] == BLOCK_COUNT_MARKER:
           builtin_name = fields[1]
@@ -133,12 +133,14 @@ def write_hints_to_output(output_file, branch_hints, builtin_hashes):
   try:
     with open(output_file, "w") as f:
       for key in branch_hints:
-        f.write("{},{},{},{},{}\n".format(BRANCH_HINT_MARKER, key[0], key[1],
-                                          key[2], branch_hints[key]))
+        f.write(
+            f"{BRANCH_HINT_MARKER},{key[0]},{key[1]},{key[2]},{branch_hints[key]}\n"
+        )
 
       for builtin_name in builtin_hashes:
-        f.write("{},{},{}\n".format(BUILTIN_HASH_MARKER, builtin_name,
-                                    builtin_hashes[builtin_name]))
+        f.write(
+            f"{BUILTIN_HASH_MARKER},{builtin_name},{builtin_hashes[builtin_name]}\n"
+        )
   except IOError as e:
     print(f"Cannot read from {output_file}. {e.strerror}.")
     sys.exit(1)

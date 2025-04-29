@@ -65,7 +65,7 @@ def list_tests():
   """Iterates all fuzz tests and corresponding flags in the given base dir."""
   for f in os.listdir(test_dir):
     if f.startswith('fuzz'):
-      n = int(re.match(r'fuzz-(\d+)\.js', f).group(1))
+      n = int(re.match(r'fuzz-(\d+)\.js', f)[1])
       ff = 'flags-%d.js' % n
       yield (os.path.join(test_dir, f), os.path.join(test_dir, ff))
 

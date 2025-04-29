@@ -11,7 +11,7 @@ def tr(x):
 def table(fn):
     """Generate a 12-bit lookup table."""
     ret = []
-    for n in range(0, 2**12):
+    for n in range(2**12):
         pre = "\n\t" if n % 8 == 0 else " "
         pre = "\t" if n == 0 else pre
         ret.append("{}0x{:04X}U,".format(pre, fn(n)))

@@ -47,9 +47,8 @@ class Config(object):
     extra_flags = []
     for p, flags in additional_flags:
       if self.rng.random() < p:
-        for flag in flags.split():
-          extra_flags.append('--second-config-extra-flags=%s' % flag)
-
+        extra_flags.extend(f'--second-config-extra-flags={flag}'
+                           for flag in flags.split())
     # Calculate flags determining the experiment.
     acc = 0
     threshold = self.rng.random() * 100
@@ -57,8 +56,8 @@ class Config(object):
       acc += prob
       if acc > threshold:
         return [
-          '--first-config=' + first_config,
-          '--second-config=' + second_config,
-          '--second-d8=' + second_d8,
+            f'--first-config={first_config}',
+            f'--second-config={second_config}',
+            f'--second-d8={second_d8}',
         ] + extra_flags
     assert False

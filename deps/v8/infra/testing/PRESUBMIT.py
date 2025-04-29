@@ -63,9 +63,9 @@ def check_keys(error_msg, src_dict, supported_keys):
 
 def _check_properties(error_msg, src_dict, prop_name, supported_keys):
   properties = src_dict.get(prop_name, {})
-  if not isinstance(properties, dict):
-    return error_msg(f'Value for {prop_name} must be a dict')
-  return check_keys(error_msg, properties, supported_keys)
+  return (check_keys(error_msg, properties, supported_keys) if isinstance(
+      properties, dict) else
+          error_msg(f'Value for {prop_name} must be a dict'))
 
 
 def _check_int_range(error_msg, src_dict, prop_name, lower_bound=None,

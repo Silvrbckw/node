@@ -29,11 +29,7 @@ if __name__ == '__main__':
   # In some cases or older versions, the python executable is passed as
   # first argument. Let's be robust either way, with or without full
   # path or version.
-  if re.match(r'.*python.*', sys.argv[1]):
-    args = sys.argv[2:]
-  else:
-    args = sys.argv[1:]
-
+  args = sys.argv[2:] if re.match(r'.*python.*', sys.argv[1]) else sys.argv[1:]
   python_exe = 'python3'
 
   # To ease bisection of really old bugs, attempt to use Python2 as long

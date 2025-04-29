@@ -90,7 +90,7 @@ class Command(object):
     """Run the executable with a specific testcase."""
     args = [self.executable] + self.flags + self.files + [testcase]
     if verbose:
-      print('# Command line for %s comparison:' % self.label)
+      print(f'# Command line for {self.label} comparison:')
       print(' '.join(args))
     if self.executable.endswith('.py'):
       # Wrap with python in tests.

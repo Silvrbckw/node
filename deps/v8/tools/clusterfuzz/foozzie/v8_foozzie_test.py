@@ -260,9 +260,7 @@ def cut_verbose_output(stdout, n_comp):
 
 
 def run_foozzie(second_d8_dir, *extra_flags, **kwargs):
-  second_config = 'ignition_turbo'
-  if 'second_config' in kwargs:
-    second_config = 'jitless'
+  second_config = 'jitless' if 'second_config' in kwargs else 'ignition_turbo'
   kwargs = {}
   if PYTHON3:
     kwargs['text'] = True

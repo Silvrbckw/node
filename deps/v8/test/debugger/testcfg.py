@@ -37,16 +37,13 @@ class TestCase(testcase.D8TestCase):
     files_list = []  # List of file names to append to command arguments.
     files_match = FILES_PATTERN.search(source);
     # Accept several lines of 'Files:'.
-    while True:
-      if files_match:
-        files_list += files_match.group(1).strip().split()
-        files_match = FILES_PATTERN.search(source, files_match.end())
-      else:
-        break
-
-    files = []
-    files.append(os.path.normpath(os.path.join(
-        self.suite.root, "..", "mjsunit", "mjsunit.js")))
+    while files_match:
+      files_list += files_match.group(1).strip().split()
+      files_match = FILES_PATTERN.search(source, files_match.end())
+    files = [
+        os.path.normpath(
+            os.path.join(self.suite.root, "..", "mjsunit", "mjsunit.js"))
+    ]
     files.append(os.path.join(self.suite.root, "test-api.js"))
     files.extend([os.path.normpath(os.path.join(self.suite.root, '..', '..', f))
                   for f in files_list])
@@ -72,4 +69,4 @@ class TestCase(testcase.D8TestCase):
     # the extension in the first place.
     if os.path.exists(base_path + self._get_suffix()):
       return base_path + self._get_suffix()
-    return base_path + '.mjs'
+    return f'{base_path}.mjs'
